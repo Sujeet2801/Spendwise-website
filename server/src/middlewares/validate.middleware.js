@@ -11,7 +11,7 @@ export const validateUsingZodError = (schema) => (req, res, next) => {
             path: e.path.join('.'),
             message: e.message
         }));
-        console.log(formattedErrors);
+
         
         throw new ApiError(400, "Validation failed", formattedErrors);
         } else {
