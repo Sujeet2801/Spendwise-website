@@ -18,7 +18,9 @@ app.use(express.urlencoded({ extended: true })); // to accept data from url
 app.use(cookieParser());
 
 import healthCheckRoute from './routes/healthCheck.route.js'
+import authRoute from './routes/auth.route.js'
 
 app.use("/api/v1/users", healthCheckRoute)
+app.use("/api/v1/users", authRoute)
 
 export default app;
