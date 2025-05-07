@@ -120,10 +120,64 @@ const logoutUserController = asyncHandler( async (req, res) => {
     res.status(200).json(new ApiResponse(200, {}, "Logout successful"));
 });
 
+const getCurrentUserController = asyncHandler( async (req, res) => {
+
+    const userId = req.user?.id;
+    
+    const existingUser = await User.findById( userId )
+    if (!existingUser) {
+        throw new ApiError(404, "User not found");
+    }
+
+    res.status(200).json(new ApiResponse(200, null, "User fetched successfully"));
+})
+
+const updateCurrentUserController = asyncHandler( async (req, res) => {
+
+    const userId = req.user?.id;
+    const { name, email } = req.body;
+
+    const existingUser = await User.findById(userId);
+    if (!existingUser) {
+        throw new ApiError(404, "User does not exist");
+    }
+
+    if (name) {
+        existingUser.name = name;
+    }
+
+    if (email && email !== existingUser.email) {
+
+        const emailExists = await User.findOne({ email });
+        if (emailExists) {
+            throw new ApiError(409, "Email is already in use");
+        }
+
+        const { token, tokenExpiry } = existingUser.generateTemporaryEmailToken();
+        existingUser.email = email;
+        existingUser.isEmailVerified = false;
+        existingUser.emailVerificationToken = token;
+        existingUser.emailVerificationExpiry = tokenExpiry;
+
+        await sendVerificationEmail({
+            email,
+            name: existingUser.name,
+            verificationToken: token
+        });
+    }
+
+    await existingUser.save({ validateBeforeSave: false });
+
+    return res.status(200).json(
+        new ApiResponse(200, existingUser, "User profile updated successfully")
+    );
+});
 
 export { 
     registerUserController,
     verifyEmailController,
     loginUserController,
     logoutUserController,
+    getCurrentUserController,
+    updateCurrentUserController,
 };
