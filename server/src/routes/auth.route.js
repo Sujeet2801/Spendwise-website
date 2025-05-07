@@ -1,8 +1,10 @@
 import { Router } from "express";
 
-import { loginUserController, 
+import { getCurrentUserController, 
+        loginUserController, 
         logoutUserController, 
         registerUserController, 
+        updateCurrentUserController, 
         verifyEmailController 
     } from "../controllers/auth.controller.js";
 
@@ -16,5 +18,7 @@ router.route("/register").post( validateUsingZodError(userRegistrationSchema()),
 router.route("/verify/:token").get(verifyEmailController);
 router.route("/login").post( validateUsingZodError(userLoginSchema()),loginUserController);
 router.route("/logout").get( isAuthenticated, logoutUserController);
+router.route("/me").get(isAuthenticated, getCurrentUserController);
+router.route("/me/update").post(isAuthenticated, updateCurrentUserController);
 
 export default router;
