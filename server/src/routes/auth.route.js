@@ -1,9 +1,12 @@
 import { Router } from "express";
 
-import { getCurrentUserController, 
+import { changePasswordController, 
+        forgotPasswordRequestController, 
+        getCurrentUserController, 
         loginUserController, 
         logoutUserController, 
         registerUserController, 
+        resendVerificationEmailController, 
         updateCurrentUserController, 
         verifyEmailController 
     } from "../controllers/auth.controller.js";
@@ -20,5 +23,9 @@ router.route("/login").post( validateUsingZodError(userLoginSchema()),loginUserC
 router.route("/logout").get( isAuthenticated, logoutUserController);
 router.route("/me").get(isAuthenticated, getCurrentUserController);
 router.route("/me/update").post(isAuthenticated, updateCurrentUserController);
+
+router.route("/resend-email").post(resendVerificationEmailController);
+router.route("/reset-password").post(forgotPasswordRequestController);
+router.route("/reset-password/:token").post(changePasswordController);
 
 export default router;
