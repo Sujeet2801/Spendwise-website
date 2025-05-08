@@ -2,7 +2,7 @@ import { asyncHandler } from "../utils/asnyc-handler.js";
 import { User } from "../models/auth.model.js";
 import { ApiError } from "../utils/api-error.js";
 import { ApiResponse } from "../utils/api-response.js";
-import { sendVerificationEmail } from "../utils/mail.js";
+import { resendVerificationEmail, sendForgotPasswordEmail, sendVerificationEmail } from "../utils/mail.js";
 
 const registerUserController = asyncHandler(async (req, res) => {
     
@@ -173,6 +173,90 @@ const updateCurrentUserController = asyncHandler( async (req, res) => {
     );
 });
 
+const resendVerificationEmailController = asyncHandler( async (req, res) => {
+
+    const { email } = req.body;
+    if (!email) {
+        throw new ApiError(400, "Email is required");
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (!existingUser) {
+        throw new ApiError(404, "User does not exist");
+    }
+
+    if(existingUser.isEmailVerified){
+        throw new ApiError(400, "Email is already verified")
+    }
+
+    const { token, tokenExpiry } = existingUser.generateTemporaryEmailToken();
+    existingUser.emailVerificationToken = token,
+    existingUser.emailVerificationExpiry =  tokenExpiry
+
+    await existingUser.save({ validateBeforeSave: false });
+
+    await resendVerificationEmail({
+        email,
+        name: existingUser.name,
+        token,
+    });
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, { existingUser, token }, "Verification email resent successfully."));
+});
+
+const forgotPasswordRequestController = asyncHandler( async (req, res) => {
+
+    const { email } = req.body
+    if(!email){
+        throw new ApiError(400, "Email is required")
+    }
+
+    const existingUser = await User.findOne({ email })
+    if(!existingUser){
+        throw new ApiError(404, "User not exists")
+    }
+
+    const { unHashedToken, tokenExpiry} = existingUser.generateTemporaryToken()
+    existingUser.forgotPasswordToken = unHashedToken,
+    existingUser.forgotPasswordExpiry = tokenExpiry
+
+    await existingUser.save({ validateBeforeSave: false })
+
+    await sendForgotPasswordEmail({
+        email,
+        name: existingUser.name,
+        resetToken: unHashedToken
+    })
+
+    return res.status(201).json(new ApiResponse(201, existingUser, "Email sent successfully to reset password"))
+})
+
+const changePasswordController = asyncHandler( async (req, res) => {
+
+    const { token } = req.params;
+
+    const { newPassword } = req.body;
+    if (!newPassword) {
+        return res.status(400).json(new ApiError(400, "Password cannot be empty"));
+    }
+
+    const existingUser = await User.findOne({ forgotPasswordToken: token})
+
+    if (!existingUser) {
+        return res.status(404).json(new ApiError(404, "Invalid or expired token"));
+    }
+
+    existingUser.password = newPassword,
+    existingUser.forgotPasswordToken = undefined,
+    existingUser.forgotPasswordExpiry = undefined,
+
+    await existingUser.save({ validateBeforeSave: false })
+
+    return res.status(200).json(new ApiResponse(200, existingUser, "Password changed successfully"));
+});
+
 export { 
     registerUserController,
     verifyEmailController,
@@ -180,4 +264,7 @@ export {
     logoutUserController,
     getCurrentUserController,
     updateCurrentUserController,
+    resendVerificationEmailController,
+    forgotPasswordRequestController,
+    changePasswordController
 };
