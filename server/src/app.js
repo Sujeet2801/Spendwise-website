@@ -19,8 +19,10 @@ app.use(cookieParser());
 
 import healthCheckRoute from './routes/healthCheck.route.js'
 import authRoute from './routes/auth.route.js'
+import expenseRoute from './routes/expense.route.js'
 
 app.use("/api/v1/users", healthCheckRoute)
 app.use("/api/v1/users", authRoute)
+app.use("/api/v1/users", expenseRoute)
 
 export default app;
