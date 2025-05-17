@@ -88,8 +88,73 @@ const deleteExpenseController = asyncHandler( async (req, res) => {
 
 })
 
+const getExpenseController = asyncHandler( async (req, res) => {
+
+    const userId = req.user?.id
+    
+    const existingExpense = await Expense.find({ user: userId })
+    console.log(existingExpense);
+    
+    if(!existingExpense){
+        throw new ApiError(404, "No expenses found")
+    }
+
+    return res.status(200).json(200,  existingExpense, "All expenses fetched")
+
+})
+
+const getExpenseByCategoryController = asyncHandler( async (req, res) => {
+
+    const { category } = req.params;
+    const userId = req.user?.id;
+
+    const result = await Expense.find({ 
+        user: userId,
+        category: category
+    })
+
+    if (result.length === 0) {
+        throw new ApiError(404, "No expenses found in this category");
+    }
+
+    res.status(200).json(new ApiResponse(200, result, "Expenses fetched"))
+})
+
+const getExpenseByCategoryMonthController = asyncHandler( async (req, res) => {
+    
+    const { month, year, day } = req.query;
+    const { category } = req.params;
+    const userId = req.user?.id;
+
+    if (!category) {
+        throw new ApiError(400, "Category is required");
+    }
+    
+    const query = {
+        user: userId,
+        category,
+    };
+
+    if (month) query.month = parseInt(month);
+    if (year) query.year = parseInt(year);
+    if (day) query.day = parseInt(day);
+
+    console.log(query);
+
+    const result = await Expense.find(query);
+
+    if (result.length === 0) {
+        throw new ApiError(404, "No expenses found for the given filters");
+    }
+
+    res.status(200).json(new ApiResponse(200, result, "Expenses fetched"));
+});
+
 export {
     addExpense,
     updateExpenseController,
-    deleteExpenseController
+    deleteExpenseController,
+    getExpenseController,
+    getExpenseByCategoryController,
+    getExpenseByCategoryMonthController
 }
