@@ -3,9 +3,11 @@ import { isAuthenticated } from '../middlewares/auth.middleware.js'
 import { 
     addExpense, 
     deleteExpenseController, 
+    getExpenseByCategoryController, 
+    getExpenseByCategoryMonthController, 
+    getExpenseController, 
     updateExpenseController 
 } from "../controllers/expense.controller.js";
-
 import { validateUsingZodError } from "../middlewares/validate.middleware.js";
 import { expenseSchema } from "../validators/expense.validate.js";
 
@@ -24,5 +26,17 @@ router
 router
     .route("/expense/delete/:id")
     .delete( deleteExpenseController)
+
+router
+    .route("/expenses")
+    .get( getExpenseController )
+
+router
+    .route("/expense/:category")
+    .get( getExpenseByCategoryController)
+
+router
+    .route("/expenses/:category")
+    .get( getExpenseByCategoryMonthController)
 
 export default router;
