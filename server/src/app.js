@@ -21,10 +21,12 @@ import healthCheckRoute from './routes/healthCheck.route.js'
 import authRoute from './routes/auth.route.js'
 import expenseRoute from './routes/expense.route.js'
 import incomeRoutes from './routes/income.route.js'
+import dashboardRoutes from './routes/dashboard.route.js'
 
 app.use("/api/v1/users", healthCheckRoute)
 app.use("/api/v1/users", authRoute)
 app.use("/api/v1/users", expenseRoute)
 app.use("/api/v1/users", incomeRoutes)
+app.use("/api/v1/users", dashboardRoutes)
 
 export default app;
