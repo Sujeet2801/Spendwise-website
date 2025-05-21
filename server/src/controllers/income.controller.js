@@ -92,8 +92,44 @@ const deleteIncomeController = asyncHandler( async (req, res) => {
 
 })
 
+const getAllIncome = asyncHandler ( async (req, res) => {
+
+    const userId = req.user?.id;
+
+    const existingIncome = await Income.find({ user: userId })
+    if(!existingIncome){
+        throw new ApiError(404, "No income found");
+    }
+
+    return res.status(200).json(new ApiResponse(200, existingIncome, "All income fetched"));
+})
+
+const getAllIncomeBySource = asyncHandler( async (req, res) => {
+
+    const { source } = req.params;
+    const userId = req.user?.id;
+    
+    if(!source){
+        throw new ApiError(400, "Income source should be provided")
+    }
+
+    const existingExpenseBySource = await Income.find({
+        user: userId, source: source
+    })
+
+    if(!existingExpenseBySource){
+        throw new ApiError(404, "No income found in this source")
+    }
+
+    return res.status(200)
+        .json(new ApiResponse(200, existingExpenseBySource, "All income from this source is fetched"))
+
+})
+
 export {
     addIncomeController,
     updateIncomeController,
-    deleteIncomeController
+    deleteIncomeController,
+    getAllIncome,
+    getAllIncomeBySource
 }
