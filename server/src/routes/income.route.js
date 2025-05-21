@@ -3,6 +3,8 @@ import { isAuthenticated } from "../middlewares/auth.middleware.js";
 import { 
     addIncomeController, 
     deleteIncomeController, 
+    getAllIncome, 
+    getAllIncomeBySource, 
     updateIncomeController 
 } from "../controllers/income.controller.js";
 import { validateUsingZodError } from "../middlewares/validate.middleware.js";
@@ -23,5 +25,13 @@ router
 router
     .route("/income/update/:id")
     .put( isAuthenticated, updateIncomeController)
+
+router
+    .route("/incomes")
+    .get( isAuthenticated, getAllIncome )
+
+router
+    .route("/income/:source")
+    .get( isAuthenticated, getAllIncomeBySource )
 
 export default router;
