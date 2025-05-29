@@ -32,6 +32,6 @@ const incomeSchema = new Schema({
         type: String,
         trim: true
     }
-});
+}, { timestamps: true });
 
 export const Income = mongoose.model('Income', incomeSchema);
