@@ -74,6 +74,71 @@ const DashboardController = {
         return res.status(200).json(new ApiResponse(200, summary, "Summary fetched"))
     }),
 
+    getSpendingTrends: asyncHandler(async (req, res) => {
+
+        const userId = mongoose.Types.ObjectId.createFromHexString(req.user.id);
+        const start = moment().subtract(30, 'days').toDate();
+        console.log(start);
+        
+        const trends = await Expense.aggregate([
+            {
+                $match: {
+                    user: userId,
+                    date: { $gte: start }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        day: { $dateToString: { format: "%Y-%m-%d", date: "$date" } }
+                    },
+                    total: { $sum: "$amount" }
+                }
+            },
+            { $sort: { "_id.day": 1 } }
+        ]);
+
+        res.json(trends);
+    }),
+
+    getTopCategories: asyncHandler(async (req, res) => {
+
+        const userId = mongoose.Types.ObjectId.createFromHexString(req.user.id);
+        const start = moment().startOf('month').toDate();
+        const end = moment().endOf('month').toDate();
+        console.log(start, end);
+
+        const topCategories = await Expense.aggregate([
+            {
+                $match: {
+                    user: userId,
+                    date: { $gte: start, $lte: end }
+                }
+            },
+            {
+                $group: {
+                    _id: "$category",
+                    total: { $sum: "$amount" }
+                }
+            },
+            { $sort: { total: -1 } },
+            { $limit: 5 }
+        ]);
+
+        res.json(topCategories);
+    }),
+
+    getFinancialTips: asyncHandler(async (req, res) => {
+        const tips = [
+            "Track subscriptions to avoid auto-renewals you do not use.",
+            "Set a fixed budget for food delivery apps.",
+            "Use UPI or debit card instead of credit to avoid overspending.",
+            "Review your expenses weekly for better awareness.",
+            "Split your savings before spending, not after."
+        ];
+
+        res.json({ tips });
+    })
 };
 
 export default DashboardController;
