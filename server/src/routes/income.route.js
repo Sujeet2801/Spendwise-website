@@ -5,7 +5,8 @@ import {
     deleteIncomeController, 
     getAllIncome, 
     getAllIncomeBySource, 
-    updateIncomeController 
+    updateIncomeController,
+    getIncomeGroupByCategoryController
 } from "../controllers/income.controller.js";
 import { validateUsingZodError } from "../middlewares/validate.middleware.js";
 import { incomeSchema } from "../validators/income.validate.js";
@@ -33,5 +34,9 @@ router
 router
     .route("/income/:source")
     .get( isAuthenticated, getAllIncomeBySource )
+
+router
+    .route("/income/group/category")
+    .get( getIncomeGroupByCategoryController )
 
 export default router;
