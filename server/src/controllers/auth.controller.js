@@ -36,6 +36,19 @@ const registerUserController = asyncHandler(async (req, res) => {
         phone: newUser.phone,
     };
 
+    const cookieToken = await newUser.generateRefreshToken();
+    newUser.refreshToken = cookieToken;
+
+    await newUser.save({ validateBeforeSave: false });
+
+    res.cookie("token", cookieToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
     return res.status(201).json(
         new ApiResponse(201, { user: userData }, "User registered successfully")
     );
@@ -129,7 +142,7 @@ const getCurrentUserController = asyncHandler( async (req, res) => {
         throw new ApiError(404, "User not found");
     }
 
-    res.status(200).json(new ApiResponse(200, null, "User fetched successfully"));
+    res.status(200).json(new ApiResponse(200, existingUser, "User fetched successfully"));
 })
 
 const updateCurrentUserController = asyncHandler( async (req, res) => {
