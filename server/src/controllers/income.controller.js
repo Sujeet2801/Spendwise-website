@@ -2,6 +2,7 @@ import { ApiError } from "../utils/api-error.js";
 import { asyncHandler } from "../utils/asnyc-handler.js";
 import { Income } from "../models/income.model.js";
 import { ApiResponse } from "../utils/api-response.js";
+import mongoose from "mongoose";
 
 const addIncomeController = asyncHandler( async (req, res) => {
 
@@ -126,10 +127,29 @@ const getAllIncomeBySource = asyncHandler( async (req, res) => {
 
 })
 
+const getIncomeGroupByCategoryController = asyncHandler(async (req, res) => {
+
+    const userId = mongoose.Types.ObjectId.createFromHexString(req.user.id);
+
+    const result = await Income.aggregate([
+        { $match: { user: userId } },
+        {
+            $group: {
+                _id: "$source",
+                total: { $sum: "$amount" }
+            }
+        },
+        { $sort: { total: -1 } }
+    ]);
+
+    res.status(200).json(new ApiResponse(200, result, "Grouped income data"));
+});
+
 export {
     addIncomeController,
     updateIncomeController,
     deleteIncomeController,
     getAllIncome,
-    getAllIncomeBySource
+    getAllIncomeBySource,
+    getIncomeGroupByCategoryController
 }
