@@ -6,7 +6,8 @@ import {
     getExpenseByCategoryController, 
     getExpenseByCategoryMonthController, 
     getExpenseController, 
-    updateExpenseController 
+    updateExpenseController,
+    getExpenseGroupByCategoryController
 } from "../controllers/expense.controller.js";
 import { validateUsingZodError } from "../middlewares/validate.middleware.js";
 import { expenseSchema } from "../validators/expense.validate.js";
@@ -38,5 +39,9 @@ router
 router
     .route("/expenses/:category")
     .get( getExpenseByCategoryMonthController)
+
+router
+    .route("/expense/group/category")
+    .get( getExpenseGroupByCategoryController )
 
 export default router;
