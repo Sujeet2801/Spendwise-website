@@ -2,6 +2,7 @@ import { Expense } from "../models/expense.model.js";
 import { ApiError } from "../utils/api-error.js";
 import { ApiResponse } from "../utils/api-response.js";
 import { asyncHandler } from "../utils/asnyc-handler.js";
+import mongoose from "mongoose";
 
 const addExpense = asyncHandler( async (req, res) => {
 
@@ -99,7 +100,7 @@ const getExpenseController = asyncHandler( async (req, res) => {
         throw new ApiError(404, "No expenses found")
     }
 
-    return res.status(200).json(200,  existingExpense, "All expenses fetched")
+    return res.status(200).json(new ApiResponse(200,  existingExpense, "All expenses fetched"))
 
 })
 
@@ -150,11 +151,30 @@ const getExpenseByCategoryMonthController = asyncHandler( async (req, res) => {
     res.status(200).json(new ApiResponse(200, result, "Expenses fetched"));
 });
 
+const getExpenseGroupByCategoryController = asyncHandler(async (req, res) => {
+
+    const userId = mongoose.Types.ObjectId.createFromHexString(req.user.id);
+
+    const result = await Expense.aggregate([
+        { $match: { user: userId } },
+        {
+            $group: {
+                _id: "$category",
+                total: { $sum: "$amount" }
+            }
+        },
+        { $sort: { total: -1 } }
+    ]);
+
+    res.status(200).json(new ApiResponse(200, result, "Grouped expense data"));
+});
+
 export {
     addExpense,
     updateExpenseController,
     deleteExpenseController,
     getExpenseController,
     getExpenseByCategoryController,
-    getExpenseByCategoryMonthController
+    getExpenseByCategoryMonthController,
+    getExpenseGroupByCategoryController
 }
