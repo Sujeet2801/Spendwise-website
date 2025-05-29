@@ -36,19 +36,6 @@ const registerUserController = asyncHandler(async (req, res) => {
         phone: newUser.phone,
     };
 
-    const cookieToken = await newUser.generateRefreshToken();
-    newUser.refreshToken = cookieToken;
-
-    await newUser.save({ validateBeforeSave: false });
-
-    res.cookie("token", cookieToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
     return res.status(201).json(
         new ApiResponse(201, { user: userData }, "User registered successfully")
     );
