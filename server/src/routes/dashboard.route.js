@@ -9,5 +9,8 @@ router.use(isAuthenticated);
 router.get('/overview', DashboardController.getOverview);
 router.get('/recent-transactions', DashboardController.getRecentTransactions);
 router.get('/summary', DashboardController.getSummary);
+router.get('/spending-trends', DashboardController.getSpendingTrends);
+router.get('/top-categories', DashboardController.getTopCategories);
+router.get('/financial-tips', DashboardController.getFinancialTips);
 
 export default router;
