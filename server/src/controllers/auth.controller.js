@@ -2,7 +2,7 @@ import { asyncHandler } from "../utils/asnyc-handler.js";
 import { User } from "../models/auth.model.js";
 import { ApiError } from "../utils/api-error.js";
 import { ApiResponse } from "../utils/api-response.js";
-import { resendVerificationEmail, sendForgotPasswordEmail, sendVerificationEmail } from "../utils/mail.js";
+import { resendVerificationEmail, sendForgotPasswordEmail, sendVerificationEmail } from "../utils/resendEmail.js";
 
 const registerUserController = asyncHandler(async (req, res) => {
     
